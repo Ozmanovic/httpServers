@@ -1,22 +1,21 @@
 import type { Request, Response } from "express";
 import { createChirp } from "../db/queries/createChirp.js";
-import { getChirps } from "../db/queries/getChirps.js";
+import { getChirps, getChirpsAuthor } from "../db/queries/getChirps.js";
 import { getChirp } from "../db/queries/getChirp.js";
 import { respondWithJSON } from "./json.js";
 import { BadRequestError, NotFoundError } from "./errors.js";
 import { getBearerToken, validateJWT } from "./auth.js";
 import { config } from "../config.js";
 import { UserNotAuthenticatedError } from "./errors.js";
+import { chirps } from "src/db/schema.js";
 
 export async function handlerCreateChirps(req: Request, res: Response) {
   try {
     const token = getBearerToken(req);
-    
-    
+
     const userio = validateJWT(token, config.secret);
 
     if (typeof userio !== "string" || userio.length === 0) {
-      
       return respondWithJSON(res, 401, { error: "invalid JWT subject" });
     }
 
@@ -54,21 +53,45 @@ export async function handlerCreateChirps(req: Request, res: Response) {
     return respondWithJSON(res, 201, newChirp);
   } catch (err) {
     if (err instanceof UserNotAuthenticatedError) {
-      console.error("Login error:", err);  
+      console.error("Login error:", err);
       return respondWithJSON(res, 401, { error: "JWT error" });
     }
     return respondWithJSON(res, 500, { error: "internal error" });
   }
 }
 
-
 export async function handlerGetChirps(req: Request, res: Response) {
   try {
-    const allChirps = await getChirps();
-    res.set("Content-Type", "application/json");
-    return respondWithJSON(res, 200, allChirps);
+    let authorId = "";
+    let sort = "";
+
+    const authorIdQuery = req.query.authorId;
+    const sortQuery = req.query.sort;
+
+    if (typeof authorIdQuery === "string") {
+      authorId = authorIdQuery;
+    }
+
+    if (typeof sortQuery === "string") {
+      sort = sortQuery.toLowerCase();
+    }
+
+    let chirps;
+
+    if (authorId.length === 0) {
+      chirps = await getChirps();
+    } else {
+      chirps = await getChirpsAuthor(authorId);
+    }
+
+    if (sort === "desc") {
+      chirps = [...chirps].reverse();
+    }
+
+    return respondWithJSON(res, 200, chirps);
   } catch (err) {
-    return respondWithJSON(res, 500, { error: "Internal error " });
+    console.error("Error fetching chirps:", err);
+    return respondWithJSON(res, 500, { error: "Internal error" });
   }
 }
 

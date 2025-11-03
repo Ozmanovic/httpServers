@@ -7,3 +7,4 @@ export async function getChirp(id: string): Promise<NewChirp | null> {
   const [row] = await db.select().from(chirps).where(eq(chirps.id, id));
   return row ?? null;
 }
+

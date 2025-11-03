@@ -26,6 +26,7 @@ export async function createUserHandler(req: Request, res: Response) {
       createdAt: newUser.createdAt,
       updatedAt: newUser.updatedAt,
       email: newUser.email,
+      isChirpyRed: newUser.isChirpyRed
     });
   } catch (err: any) {
     console.error("Login error:", err);  

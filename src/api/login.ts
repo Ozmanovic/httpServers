@@ -43,6 +43,7 @@ export async function checkLogin(req: Request, res: Response) {
       email: user.email,
       token,
       refreshToken,
+      isChirpyRed: user.isChirpyRed
     });
   } catch (err) {
     if (err instanceof UserNotAuthenticatedError) {

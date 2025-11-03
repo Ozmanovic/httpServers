@@ -18,6 +18,9 @@ import { createUserHandler } from "./api/createUser.js";
 import { checkLogin } from "./api/login.js";
 import { revokeRefresh } from "./api/revoke.js";
 import { checkRefresh } from "./api/refresh.js";
+import { handlerUpdateInfo } from "./api/userUpdate.js";
+import { handlerDeleteChirp } from "./api/deleteChirp.js";
+import { handlerUpdateChirpyRed } from "./api/webhooks.js";
 
 
 const migrationClient = postgres(config.db.url, { max: 1 });
@@ -37,13 +40,14 @@ app.get("/admin/metrics", (req, res, next) => {
   Promise.resolve(handlerMetrics(req, res)).catch(next);
 });
 
-app.get("/api/chirps", (req, res, next) => {
+app.get("/api/chirps/", (req, res, next) => {
   Promise.resolve(handlerGetChirps(req, res)).catch(next)
 } )
 
 app.get(`/api/chirps/:chirpID`, (req, res, next) => {
   Promise.resolve(handlerGetChirp(req, res)).catch(next);
 })
+app.delete("/api/chirps/:chirpID", handlerDeleteChirp);
 
 app.post("/admin/reset", (req, res, next) => {
   Promise.resolve(handlerReset(req, res, next)).catch(next);
@@ -66,6 +70,11 @@ app.post("/api/refresh", (req, res, next) => {
 app.post("/api/revoke", (req, res, next) => {
   Promise.resolve(revokeRefresh(req, res)).catch(next)
 })
+app.put("/api/users", (req, res, next) => {
+  Promise.resolve(handlerUpdateInfo(req, res)).catch(next)
+})
+
+app.post("/api/polka/webhooks",handlerUpdateChirpyRed)
 
 app.use(errorMiddleWare);
 

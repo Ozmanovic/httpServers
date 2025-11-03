@@ -21,5 +21,6 @@ export async function checkUser(email: string, password: string) {
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
     email: user.email,
+    isChirpyRed: user.isChirpyRed
   };
 }

@@ -88,4 +88,28 @@ export function makeRefreshToken() {
   
 }
 
+export function getAPIKey(req: Request) {
+    const authorization = req.get("Authorization");
+
+  if (!authorization) {
+    throw new UserNotAuthenticatedError("Authorization header is missing");
+  }
+
+  
+  if (!authorization.startsWith("ApiKey ")) {
+    throw new UserNotAuthenticatedError(
+      "Authorization header must start with 'ApiKey '"
+    );
+  }
+
+  const token = authorization.slice("ApiKey ".length).trim();
+
+  if (!token) {
+    throw new UserNotAuthenticatedError("ApiKey token is missing or empty");
+  }
+
+  return token;
+}
+
+
 
